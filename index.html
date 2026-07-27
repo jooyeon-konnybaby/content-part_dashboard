@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>콘텐츠 파트 업무 대시보드 ★26FW</title>
+<style>
+  :root {
+    --jooyeon: #4F46E5;
+    --jina: #059669;
+    --zoey: #D97706;
+    --eunji: #DB2777;
+    --kay: #7C3AED;
+    --bg: #F8F9FB;
+    --card: #FFFFFF;
+    --border: #E5E7EB;
+    --text: #111827;
+    --muted: #6B7280;
+    --overdue: #EF4444;
+    --soon: #F59E0B;
+    --upcoming: #10B981;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, 'Apple SD Gothic Neo', BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+
+  /* Header */
+  .header { background: #1E1B4B; color: white; padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .header-meta { font-size: 12px; color: #A5B4FC; text-align: right; line-height: 1.6; }
+  .header-meta span { font-size: 11px; }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px 32px; }
+
+  /* Summary cards */
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .summary-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .summary-card .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .summary-card .value { font-size: 28px; font-weight: 700; line-height: 1; }
+  .summary-card.overdue .value { color: var(--overdue); }
+  .summary-card.soon .value { color: var(--soon); }
+  .summary-card.upcoming .value { color: var(--upcoming); }
+
+  /* Section titles */
+  .section-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; margin-top: 28px; }
+
+  /* Workload */
+  .workload-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 8px; }
+  .workload-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .workload-card .person-name { font-weight: 600; font-size: 15px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+  .workload-card .person-name::before { content: ''; width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .workload-card.jooyeon .person-name::before { background: var(--jooyeon); }
+  .workload-card.jina .person-name::before { background: var(--jina); }
+  .workload-card.zoey .person-name::before { background: var(--zoey); }
+  .workload-card.eunji .person-name::before { background: var(--eunji); }
+  .workload-card .task-count { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+  .workload-card.jooyeon .task-count { color: var(--jooyeon); }
+  .workload-card.jina .task-count { color: var(--jina); }
+  .workload-card.zoey .task-count { color: var(--zoey); }
+  .workload-card.eunji .task-count { color: var(--eunji); }
+  .workload-card .task-sub { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+  .bar-bg { background: #F3F4F6; border-radius: 4px; height: 6px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+  .workload-card.jooyeon .bar-fill { background: var(--jooyeon); }
+  .workload-card.jina .bar-fill { background: var(--jina); }
+  .workload-card.zoey .bar-fill { background: var(--zoey); }
+  .workload-card.eunji .bar-fill { background: var(--eunji); }
+  .workload-card.kay .person-name::before { background: var(--kay); }
+  .workload-card.kay .task-count { color: var(--kay); }
+  .workload-card.kay .bar-fill { background: var(--kay); }
+
+  /* Filters */
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
+  .filter-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--card); cursor: pointer; font-size: 12px; font-weight: 500; transition: all 0.15s; color: var(--text); }
+  .filter-btn:hover { border-color: #9CA3AF; }
+  .filter-btn.active { color: white; border-color: transparent; }
+  .filter-btn.all.active { background: var(--text); }
+  .filter-btn.jooyeon.active { background: var(--jooyeon); }
+  .filter-btn.jina.active { background: var(--jina); }
+  .filter-btn.zoey.active { background: var(--zoey); }
+  .filter-btn.eunji.active { background: var(--eunji); }
+  .filter-sep { color: var(--border); }
+  .search-box { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 12px; width: 200px; outline: none; background: var(--card); }
+  .search-box:focus { border-color: #9CA3AF; }
+
+  /* Table */
+  .table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead { background: #F9FAFB; }
+  thead th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid var(--border); white-space: nowrap; cursor: pointer; user-select: none; }
+  thead th:hover { color: var(--text); }
+  tbody tr { border-bottom: 1px solid #F3F4F6; transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #FAFAFA; }
+  tbody tr.hidden { display: none; }
+  td { padding: 10px 14px; vertical-align: middle; }
+  .assignee-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 12px; }
+  .assignee-badge.jooyeon { background: #EEF2FF; color: var(--jooyeon); }
+  .assignee-badge.jina { background: #ECFDF5; color: var(--jina); }
+  .assignee-badge.zoey { background: #FFFBEB; color: var(--zoey); }
+  .assignee-badge.eunji { background: #FDF2F8; color: var(--eunji); }
+  .assignee-badge.kay { background: #F5F3FF; color: var(--kay); }
+  .filter-btn.kay.active { background: var(--kay); }
+  .status-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .status-badge.overdue { background: #FEF2F2; color: var(--overdue); }
+  .status-badge.today { background: #FEF3C7; color: #92400E; }
+  .status-badge.soon { background: #FFFBEB; color: #92400E; }
+  .status-badge.upcoming { background: #F0FDF4; color: #166534; }
+  .status-badge.done { background: #F3F4F6; color: #6B7280; }
+  .source-badge { font-size: 11px; color: var(--muted); background: #F3F4F6; padding: 2px 7px; border-radius: 8px; }
+  .source-badge.manual { background: #EDE9FE; color: #5B21B6; }
+  .task-name { font-size: 13px; max-width: 280px; }
+  .section-tag { font-size: 11px; color: var(--muted); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .due-date { font-size: 12px; white-space: nowrap; }
+  .action-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 13px; padding: 2px 6px; border-radius: 4px; }
+  .action-btn:hover { background: #F3F4F6; color: var(--text); }
+  .no-results { text-align: center; padding: 40px; color: var(--muted); font-size: 13px; }
+
+  /* Manual task form */
+  .manual-form-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-top: 16px; }
+  .manual-form-wrap h3 { font-size: 14px; font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group label { font-size: 11px; font-weight: 600; color: var(--muted); }
+  .form-group input, .form-group select, .form-group textarea { padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-family: inherit; outline: none; background: white; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #6366F1; box-shadow: 0 0 0 2px #EEF2FF; }
+  .form-group.full { grid-column: 1 / -1; }
+  .submit-btn { background: #4F46E5; color: white; border: none; padding: 9px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s; margin-top: 10px; }
+  .submit-btn:hover { background: #4338CA; }
+
+  /* Footer */
+  .footer { text-align: center; padding: 24px; color: var(--muted); font-size: 11px; border-top: 1px solid var(--border); margin-top: 32px; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .container { padding: 16px; }
+    .header { padding: 16px; }
+    table { font-size: 12px; }
+    td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>콘텐츠 파트 업무 대시보드</h1>
+    <div style="color:#A5B4FC; font-size:13px; margin-top:3px;">★26FW 프로젝트</div>
+  </div>
+  <div class="header-meta">
+    <div id="today-date"></div>
+    <span>데이터 기준: 아사나 ★26FW + 수동 입력 병행</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Summary -->
+  <div class="section-title">전체 현황</div>
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="label">전체 업무</div>
+      <div class="value" id="stat-total">—</div>
+    </div>
+    <div class="summary-card overdue">
+      <div class="label">⚠ 마감 초과</div>
+      <div class="value" id="stat-overdue">—</div>
+    </div>
+    <div class="summary-card soon">
+      <div class="label">🔔 이번 주 마감</div>
+      <div class="value" id="stat-soon">—</div>
+    </div>
+    <div class="summary-card upcoming">
+      <div class="label">✅ 예정</div>
+      <div class="value" id="stat-upcoming">—</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">아사나 업무</div>
+      <div class="value" id="stat-asana">—</div>
+    </div>
+    <div class="summary-card" style="border-color:#DDD6FE;">
+      <div class="label">수동 입력 업무</div>
+      <div class="value" id="stat-manual" style="color:#7C3AED;">—</div>
+    </div>
+  </div>
+
+  <!-- Workload -->
+  <div class="section-title">팀원별 업무 현황</div>
+  <div class="workload-grid" id="workload-grid"></div>
+
+  <!-- Task list -->
+  <div class="section-title" style="margin-top:32px;">업무 목록</div>
+  <div class="filters">
+    <button class="filter-btn all active" onclick="setFilter('all', this)">전체</button>
+    <button class="filter-btn jooyeon" onclick="setFilter('jooyeon', this)">👤 주연</button>
+    <button class="filter-btn jina" onclick="setFilter('jina', this)">👤 진아</button>
+    <button class="filter-btn zoey" onclick="setFilter('zoey', this)">👤 유진</button>
+    <button class="filter-btn eunji" onclick="setFilter('eunji', this)">👤 은지</button>
+    <button class="filter-btn kay" onclick="setFilter('kay', this)">👤 경진(Kay)</button>
+    <span class="filter-sep">|</span>
+    <button class="filter-btn" id="btn-overdue-filter" onclick="setStatusFilter('overdue')">⚠ 마감 초과만</button>
+    <button class="filter-btn" id="btn-asana-only" onclick="toggleSourceFilter()">📋 아사나만</button>
+    <input type="text" class="search-box" id="search-input" placeholder="🔍 업무명 검색..." oninput="renderTable()">
+  </div>
+  <div class="table-wrap">
+    <table id="task-table">
+      <thead>
+        <tr>
+          <th onclick="sortBy('assignee')">담당자</th>
+          <th onclick="sortBy('name')">업무명</th>
+          <th onclick="sortBy('section')">제품 / 섹션</th>
+          <th onclick="sortBy('dueDate')">마감일</th>
+          <th onclick="sortBy('status')">상태</th>
+          <th>출처</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="task-tbody"></tbody>
+    </table>
+    <div class="no-results" id="no-results" style="display:none;">조건에 맞는 업무가 없습니다.</div>
+  </div>
+
+  <!-- Manual task form -->
+  <div class="manual-form-wrap" id="manual-form">
+    <h3>➕ 아사나 외 업무 직접 입력</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>담당자 *</label>
+        <select id="f-assignee">
+          <option value="">선택</option>
+          <option value="jooyeon|주연">주연</option>
+          <option value="jina|진아">진아</option>
+          <option value="zoey|유진">유진</option>
+          <option value="eunji|은지">은지</option>
+          <option value="kay|경진(Kay)">경진(Kay)</option>
+        </select>
+      </div>
+      <div class="form-group" style="grid-column: span 2;">
+        <label>업무명 *</label>
+        <input type="text" id="f-name" placeholder="업무 이름을 입력하세요">
+      </div>
+      <div class="form-group" style="grid-column: span 2;">
+        <label>제품 / 섹션</label>
+        <input type="text" id="f-section" placeholder="예: 8/19 가을의류, 캠페인 등">
+      </div>
+      <div class="form-group">
+        <label>마감일</label>
+        <input type="date" id="f-due">
+      </div>
+      <div class="form-group full">
+        <label>메모</label>
+        <input type="text" id="f-note" placeholder="추가 메모 (선택사항)">
+      </div>
+    </div>
+    <button class="submit-btn" onclick="addManualTask()">업무 추가</button>
+  </div>
+
+</div>
+
+<div class="footer">
+  콘텐츠 파트 업무 대시보드 ★26FW &nbsp;|&nbsp; 아사나 데이터 마지막 동기화: 2026-07-27 &nbsp;|&nbsp; 수동 입력 데이터는 이 브라우저에 저장됩니다
+</div>
+
+<script>
+// ─── 날짜 유틸 ─────────────────────────────────────
+const TODAY = new Date('2026-07-27');
+function dateDiff(d) {
+  if (!d) return null;
+  return Math.ceil((new Date(d) - TODAY) / 86400000);
+}
+function getStatus(dueDate, completed) {
+  if (completed) return 'done';
+  if (!dueDate) return 'upcoming';
+  const diff = dateDiff(dueDate);
+  if (diff < 0) return 'overdue';
+  if (diff === 0) return 'today';
+  if (diff <= 7) return 'soon';
+  return 'upcoming';
+}
+function statusLabel(s) {
+  return { overdue: '마감 초과', today: '오늘 마감', soon: '이번 주', upcoming: '예정', done: '완료' }[s] || s;
+}
+function fmtDate(d) {
+  if (!d) return '—';
+  const [y, m, day] = d.split('-');
+  return `${m}/${day}`;
+}
+
+// ─── 아사나 업무 데이터 (2026-07-27 동기화) ──────────────────────────────
+const ASANA_TASKS = [
+  // ── 주연 (12) ──
+  { id:'a001', assignee:'주연', cls:'jooyeon', name:'콘텐츠 셀렉 (제품컷)', section:'9/2 가을뉴본', dueDate:'2026-06-24', completed:false },
+  { id:'a002', assignee:'주연', cls:'jooyeon', name:'PDP 원본 삽입 구성 7️⃣', section:'9/16 겨울의류', dueDate:'2026-07-14', completed:false },
+  { id:'a003', assignee:'주연', cls:'jooyeon', name:'최종 카피 컨펌', section:'9/16 겨울의류', dueDate:'2026-07-29', completed:false },
+  { id:'a004', assignee:'주연', cls:'jooyeon', name:'PDP 최종 7️⃣', section:'9/16 겨울의류', dueDate:'2026-07-31', completed:false },
+  { id:'a005', assignee:'주연', cls:'jooyeon', name:'최종 카피 컨펌', section:'9/30 겨울뉴본+베이비', dueDate:'2026-08-04', completed:false },
+  { id:'a006', assignee:'주연', cls:'jooyeon', name:'1차컨펌(카피)', section:'10/7 식기', dueDate:'2026-08-05', completed:false },
+  { id:'a007', assignee:'주연', cls:'jooyeon', name:'기획 확인', section:'9/16 겨울의류', dueDate:'2026-08-11', completed:false },
+  { id:'a008', assignee:'주연', cls:'jooyeon', name:'최종 카피 컨펌', section:'11/4 홀리데이', dueDate:'2026-08-19', completed:false },
+  { id:'a009', assignee:'주연', cls:'jooyeon', name:'기획 확인', section:'9/30 겨울뉴본+베이비', dueDate:'2026-08-27', completed:false },
+  { id:'a010', assignee:'주연', cls:'jooyeon', name:'최종 카피 컨펌', section:'10/7 식기', dueDate:'2026-08-28', completed:false },
+  { id:'a011', assignee:'주연', cls:'jooyeon', name:'기획 확인', section:'9/16 겨울의류', dueDate:'2026-09-02', completed:false },
+  { id:'a012', assignee:'주연', cls:'jooyeon', name:'기획 확인', section:'9/30 겨울뉴본+베이비', dueDate:'2026-09-11', completed:false },
+
+  // ── 진아 (8) ──
+  { id:'a101', assignee:'진아', cls:'jina', name:'컨텐츠셀렉', section:'8/19 가을실내복', dueDate:'2026-06-12', completed:false },
+  { id:'a102', assignee:'진아', cls:'jina', name:'콘텐츠 셀렉 (제품컷·유색버클)', section:'9/9 겨울의류', dueDate:'2026-07-01', completed:false },
+  { id:'a103', assignee:'진아', cls:'jina', name:'기획 클로징', section:'8/19 가을의류', dueDate:'2026-07-23', completed:false },
+  { id:'a104', assignee:'진아', cls:'jina', name:'PDP 원본 삽입 구성 1️⃣1️⃣', section:'9/30 겨울뉴본+베이비', dueDate:'2026-07-28', completed:false },
+  { id:'a105', assignee:'진아', cls:'jina', name:'PDP 최종 1️⃣1️⃣', section:'9/30 겨울뉴본+베이비', dueDate:'2026-08-07', completed:false },
+  { id:'a106', assignee:'진아', cls:'jina', name:'뉴본 2차 컬렉션페이지 업데이트 기획', section:'9/30 겨울뉴본+베이비', dueDate:'2026-08-25', completed:false },
+  { id:'a107', assignee:'진아', cls:'jina', name:'피드백 반영', section:'9/30 겨울뉴본+베이비', dueDate:'2026-08-28', completed:false },
+  { id:'a108', assignee:'진아', cls:'jina', name:'기획 클로징', section:'9/30 겨울뉴본+베이비', dueDate:'2026-09-04', completed:false },
+
+  // ── 유진 (10) ──
+  { id:'a201', assignee:'유진', cls:'zoey', name:'PDP 원본 삽입 구성 1️⃣1️⃣', section:'9/30 겨울뉴본+베이비', dueDate:'2026-07-28', completed:false },
+  { id:'a203', assignee:'유진', cls:'zoey', name:'피드백 반영', section:'11/4 홀리데이', dueDate:'2026-07-30', completed:false },
+  { id:'a204', assignee:'유진', cls:'zoey', name:'PDP 최종 1️⃣1️⃣', section:'9/30 겨울뉴본+베이비', dueDate:'2026-08-07', completed:false },
+  { id:'a205', assignee:'유진', cls:'zoey', name:'콘텐츠 셀렉 (제품+모델컷) 6️⃣', section:'11/4 홀리데이', dueDate:'2026-08-11', completed:false },
+  { id:'a206', assignee:'유진', cls:'zoey', name:'PDP 원본 삽입 구성 6️⃣', section:'11/4 홀리데이', dueDate:'2026-08-14', completed:false },
+  { id:'a207', assignee:'유진', cls:'zoey', name:'PDP 최종 6️⃣', section:'11/4 홀리데이', dueDate:'2026-08-21', completed:false },
+  { id:'a208', assignee:'유진', cls:'zoey', name:'뉴본 3차 컬렉션 업데이트 기획 (겨울)', section:'9/30 겨울뉴본+베이비', dueDate:'2026-09-10', completed:false },
+  { id:'a209', assignee:'유진', cls:'zoey', name:'피드백 반영', section:'9/30 겨울뉴본+베이비', dueDate:'2026-09-14', completed:false },
+  { id:'a210', assignee:'유진', cls:'zoey', name:'피드백 반영', section:'9/30 겨울뉴본+베이비', dueDate:'2026-09-16', completed:false },
+  { id:'a211', assignee:'유진', cls:'zoey', name:'기획클로징', section:'9/30 겨울뉴본+베이비', dueDate:'2026-09-17', completed:false },
+
+  // ── 은지 (12) ──
+  { id:'a301', assignee:'은지', cls:'eunji', name:'피드백 반영', section:'9/2 가을뉴본', dueDate:'2026-07-23', completed:false },
+  { id:'a302', assignee:'은지', cls:'eunji', name:'피드백 반영', section:'9/2 가을뉴본', dueDate:'2026-07-29', completed:false },
+  { id:'a303', assignee:'은지', cls:'eunji', name:'뉴본 가을 컬렉션 기획 클로징', section:'9/2 가을뉴본', dueDate:'2026-07-30', completed:false },
+  { id:'a304', assignee:'은지', cls:'eunji', name:'PDP 최종 🔟+7️⃣', section:'9/16 겨울의류', dueDate:'2026-08-04', completed:false },
+  { id:'a305', assignee:'은지', cls:'eunji', name:'베이비&키즈 겨울 컬렉션페이지 기획', section:'9/16 겨울의류', dueDate:'2026-08-07', completed:false },
+  { id:'a306', assignee:'은지', cls:'eunji', name:'피드백 반영', section:'9/16 겨울의류', dueDate:'2026-08-12', completed:false },
+  { id:'a307', assignee:'은지', cls:'eunji', name:'피드백 반영', section:'9/16 겨울의류', dueDate:'2026-08-19', completed:false },
+  { id:'a308', assignee:'은지', cls:'eunji', name:'기획클로징', section:'9/16 겨울의류', dueDate:'2026-08-20', completed:false },
+  { id:'a309', assignee:'은지', cls:'eunji', name:'베이비&키즈 겨울 컬렉션 2차 업데이트', section:'9/16 겨울의류', dueDate:'2026-08-31', completed:false },
+  { id:'a310', assignee:'은지', cls:'eunji', name:'피드백 반영', section:'9/16 겨울의류', dueDate:'2026-09-03', completed:false },
+  { id:'a311', assignee:'은지', cls:'eunji', name:'마케팅 확인', section:'9/16 겨울의류', dueDate:'2026-09-07', completed:false },
+  { id:'a312', assignee:'은지', cls:'eunji', name:'기획 클로징', section:'9/16 겨울의류', dueDate:'2026-09-10', completed:false },
+
+  // ── 경진(Kay) (17) ──
+  { id:'a401', assignee:'경진(Kay)', cls:'kay', name:'필수컷1차', section:'10/7 식기', dueDate:'2026-07-24', completed:false },
+  { id:'a402', assignee:'경진(Kay)', cls:'kay', name:'피드백 반영', section:'11/4 홀리데이', dueDate:'2026-07-30', completed:false },
+  { id:'a403', assignee:'경진(Kay)', cls:'kay', name:'☾필수컷 리전 취합', section:'10/7 식기', dueDate:'2026-07-31', completed:false },
+  { id:'a404', assignee:'경진(Kay)', cls:'kay', name:'(경진) PDP 템플릿 변경 3️⃣ (기존 제품)', section:'10/7 식기', dueDate:'2026-07-31', completed:false },
+  { id:'a405', assignee:'경진(Kay)', cls:'kay', name:'(경진) PDP작성 2️⃣ (신규 론칭)', section:'10/7 식기', dueDate:'2026-07-31', completed:false },
+  { id:'a406', assignee:'경진(Kay)', cls:'kay', name:'필수컷 최종', section:'10/7 식기', dueDate:'2026-08-03', completed:false },
+  { id:'a407', assignee:'경진(Kay)', cls:'kay', name:'(경진) 피드백 반영', section:'10/7 식기', dueDate:'2026-08-07', completed:false },
+  { id:'a408', assignee:'경진(Kay)', cls:'kay', name:'콘텐츠 셀렉 (제품+모델컷) 4️⃣', section:'11/4 홀리데이', dueDate:'2026-08-11', completed:false },
+  { id:'a409', assignee:'경진(Kay)', cls:'kay', name:'PDP 원본 삽입 구성 4️⃣', section:'11/4 홀리데이', dueDate:'2026-08-14', completed:false },
+  { id:'a410', assignee:'경진(Kay)', cls:'kay', name:'(경진) 피드백 반영', section:'10/7 식기', dueDate:'2026-08-14', completed:false },
+  { id:'a411', assignee:'경진(Kay)', cls:'kay', name:'(경진) 콘텐츠 셀렉 (제품컷)', section:'10/7 식기', dueDate:'2026-08-19', completed:false },
+  { id:'a412', assignee:'경진(Kay)', cls:'kay', name:'PDP 최종 4️⃣', section:'11/4 홀리데이', dueDate:'2026-08-21', completed:false },
+  { id:'a413', assignee:'경진(Kay)', cls:'kay', name:'(경진) 콘텐츠 셀렉(모델)', section:'10/7 식기', dueDate:'2026-08-21', completed:false },
+  { id:'a414', assignee:'경진(Kay)', cls:'kay', name:'(경진) PDP 원본 삽입 구성 3️⃣ (기존 제품)', section:'10/7 식기', dueDate:'2026-08-26', completed:false },
+  { id:'a415', assignee:'경진(Kay)', cls:'kay', name:'(경진) PDP 원본 삽입 구성 2️⃣ (신규 론칭)', section:'10/7 식기', dueDate:'2026-08-26', completed:false },
+  { id:'a416', assignee:'경진(Kay)', cls:'kay', name:'(경진) PDP 최종 3️⃣ (기존 제품)', section:'10/7 식기', dueDate:'2026-09-01', completed:false },
+  { id:'a417', assignee:'경진(Kay)', cls:'kay', name:'(경진) PDP 최종 2️⃣ (신규 론칭)', section:'10/7 식기', dueDate:'2026-09-01', completed:false },
+];
+
+// ─── 수동 업무 로드/저장 ────────────────────────────
+const STORAGE_KEY = '26fw_manual_tasks';
+let manualTasks = [];
+try { manualTasks = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e) {}
+
+function saveManual() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(manualTasks));
+}
+
+// ─── 필터 상태 ──────────────────────────────────────
+let filterPerson = 'all';
+let filterOverdue = false;
+let filterAsanaOnly = false;
+let sortKey = 'dueDate';
+let sortAsc = true;
+
+function setFilter(p, btn) {
+  filterPerson = p;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+function setStatusFilter(s) {
+  filterOverdue = !filterOverdue;
+  const btn = document.getElementById('btn-overdue-filter');
+  btn.classList.toggle('active', filterOverdue);
+  renderTable();
+}
+
+function toggleSourceFilter() {
+  filterAsanaOnly = !filterAsanaOnly;
+  const btn = document.getElementById('btn-asana-only');
+  btn.classList.toggle('active', filterAsanaOnly);
+  renderTable();
+}
+
+function sortBy(key) {
+  if (sortKey === key) sortAsc = !sortAsc;
+  else { sortKey = key; sortAsc = true; }
+  renderTable();
+}
+
+// ─── 렌더링 ────────────────────────────────────────
+function allTasks() {
+  const manual = manualTasks.map(t => ({ ...t, source: 'manual' }));
+  return [...ASANA_TASKS.map(t => ({ ...t, source: 'asana' })), ...manual];
+}
+
+function renderStats() {
+  const tasks = allTasks();
+  document.getElementById('stat-total').textContent = tasks.length;
+  document.getElementById('stat-overdue').textContent = tasks.filter(t => getStatus(t.dueDate, t.completed) === 'overdue').length;
+  document.getElementById('stat-soon').textContent = tasks.filter(t => ['today','soon'].includes(getStatus(t.dueDate, t.completed))).length;
+  document.getElementById('stat-upcoming').textContent = tasks.filter(t => getStatus(t.dueDate, t.completed) === 'upcoming').length;
+  document.getElementById('stat-asana').textContent = tasks.filter(t => t.source === 'asana').length;
+  document.getElementById('stat-manual').textContent = tasks.filter(t => t.source === 'manual').length;
+}
+
+function renderWorkload() {
+  const tasks = allTasks();
+  const members = [
+    { cls:'jooyeon', name:'주연', role:'파트 리드' },
+    { cls:'jina',    name:'진아', role:'콘텐츠 에디터' },
+    { cls:'zoey',    name:'유진', role:'콘텐츠 에디터' },
+    { cls:'eunji',   name:'은지', role:'콘텐츠 에디터' },
+    { cls:'kay',     name:'경진(Kay)', role:'콘텐츠 에디터' },
+  ];
+  const maxCount = Math.max(...members.map(m => tasks.filter(t => t.assignee === m.name).length)) || 1;
+  const grid = document.getElementById('workload-grid');
+  grid.innerHTML = members.map(m => {
+    const mt = tasks.filter(t => t.assignee === m.name);
+    const overdue = mt.filter(t => getStatus(t.dueDate, t.completed) === 'overdue').length;
+    const pct = Math.round((mt.length / maxCount) * 100);
+    return `<div class="workload-card ${m.cls}">
+      <div class="person-name">${m.name}</div>
+      <div class="task-count">${mt.length}</div>
+      <div class="task-sub">${m.role} &nbsp;·&nbsp; 마감 초과 <strong style="color:var(--overdue)">${overdue}</strong>건</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderTable() {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  let tasks = allTasks();
+
+  if (filterPerson !== 'all') {
+    const nameMap = { jooyeon:'주연', jina:'진아', zoey:'유진', eunji:'은지', kay:'경진(Kay)' };
+    tasks = tasks.filter(t => t.assignee === nameMap[filterPerson]);
+  }
+  if (filterOverdue) tasks = tasks.filter(t => getStatus(t.dueDate, t.completed) === 'overdue');
+  if (filterAsanaOnly) tasks = tasks.filter(t => t.source === 'asana');
+  if (search) tasks = tasks.filter(t => t.name.toLowerCase().includes(search) || (t.section||'').toLowerCase().includes(search));
+
+  tasks.sort((a, b) => {
+    let va = a[sortKey] || '', vb = b[sortKey] || '';
+    if (sortKey === 'status') { va = getStatus(a.dueDate, a.completed); vb = getStatus(b.dueDate, b.completed); }
+    const r = va < vb ? -1 : va > vb ? 1 : 0;
+    return sortAsc ? r : -r;
+  });
+
+  const tbody = document.getElementById('task-tbody');
+  const noRes = document.getElementById('no-results');
+
+  if (!tasks.length) {
+    tbody.innerHTML = '';
+    noRes.style.display = 'block';
+    return;
+  }
+  noRes.style.display = 'none';
+
+  tbody.innerHTML = tasks.map(t => {
+    const st = getStatus(t.dueDate, t.completed);
+    const diff = dateDiff(t.dueDate);
+    const diffStr = diff === null ? '' : diff < 0 ? `(${Math.abs(diff)}일 초과)` : diff === 0 ? '(오늘)' : `(D-${diff})`;
+    const isManual = t.source === 'manual';
+    const deleteBtn = isManual ? `<button class="action-btn" onclick="deleteManual('${t.id}')" title="삭제">✕</button>` : '';
+    return `<tr>
+      <td><span class="assignee-badge ${t.cls}">${t.assignee}</span></td>
+      <td class="task-name">${t.name}${t.note ? `<div style="font-size:11px;color:var(--muted);margin-top:2px;">${t.note}</div>` : ''}</td>
+      <td class="section-tag">${t.section || '—'}</td>
+      <td class="due-date">${fmtDate(t.dueDate)} <span style="font-size:11px;color:var(--muted)">${diffStr}</span></td>
+      <td><span class="status-badge ${st}">${statusLabel(st)}</span></td>
+      <td><span class="source-badge ${isManual ? 'manual' : ''}">${isManual ? '수동 입력' : 'Asana'}</span></td>
+      <td>${deleteBtn}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── 수동 업무 추가 ─────────────────────────────────
+function addManualTask() {
+  const assigneeRaw = document.getElementById('f-assignee').value;
+  const name = document.getElementById('f-name').value.trim();
+  if (!assigneeRaw || !name) { alert('담당자와 업무명은 필수입니다.'); return; }
+
+  const [cls, assignee] = assigneeRaw.split('|');
+  const task = {
+    id: 'm' + Date.now(),
+    assignee, cls,
+    name,
+    section: document.getElementById('f-section').value.trim(),
+    dueDate: document.getElementById('f-due').value || null,
+    note: document.getElementById('f-note').value.trim(),
+    completed: false,
+    source: 'manual',
+  };
+  manualTasks.push(task);
+  saveManual();
+  ['f-assignee','f-name','f-section','f-due','f-note'].forEach(id => { document.getElementById(id).value = ''; });
+  renderAll();
+}
+
+function deleteManual(id) {
+  if (!confirm('이 업무를 삭제할까요?')) return;
+  manualTasks = manualTasks.filter(t => t.id !== id);
+  saveManual();
+  renderAll();
+}
+
+function renderAll() {
+  renderStats();
+  renderWorkload();
+  renderTable();
+}
+
+// ─── 날짜 헤더 ──────────────────────────────────────
+document.getElementById('today-date').textContent = TODAY.toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric', weekday:'short' });
+
+// ─── 초기 렌더 ──────────────────────────────────────
+renderAll();
+</script>
+</body>
+</html>
