@@ -257,12 +257,12 @@
 </div>
 
 <div class="footer">
-  콘텐츠 파트 업무 대시보드 ★26FW &nbsp;|&nbsp; 아사나 데이터 마지막 동기화: 2026-07-29 &nbsp;|&nbsp; 수동 입력 데이터는 이 브라우저에 저장됩니다
+  콘텐츠 파트 업무 대시보드 ★26FW &nbsp;|&nbsp; 아사나 데이터 마지막 동기화: 2026-07-30 &nbsp;|&nbsp; 수동 입력 데이터는 이 브라우저에 저장됩니다
 </div>
 
 <script>
 // ─── 날짜 유틸 ─────────────────────────────────────
-const TODAY = new Date('2026-07-29');
+const TODAY = new Date('2026-07-30');
 function dateDiff(d) {
   if (!d) return null;
   return Math.ceil((new Date(d) - TODAY) / 86400000);
@@ -285,21 +285,18 @@ function fmtDate(d) {
   return `${m}/${day}`;
 }
 
-// ─── 아사나 업무 데이터 (2026-07-29 동기화) ──────────────────────────────
+// ─── 아사나 업무 데이터 (2026-07-30 동기화) ──────────────────────────────
 const ASANA_TASKS = [
-  // ── 주연 (12) ──
-  { id:'a001', assignee:'주연', cls:'jooyeon', name:'콘텐츠 셀렉 (제품컷)', section:'9/2 가을뉴본', dueDate:'2026-06-24', completed:false },
-  { id:'a002', assignee:'주연', cls:'jooyeon', name:'PDP 원본 삽입 구성 7️⃣', section:'9/16 겨울의류', dueDate:'2026-07-14', completed:false },
-  { id:'a003', assignee:'주연', cls:'jooyeon', name:'최종 카피 컨펌', section:'9/16 겨울의류', dueDate:'2026-07-29', completed:false },
-  { id:'a004', assignee:'주연', cls:'jooyeon', name:'PDP 최종 7️⃣', section:'9/16 겨울의류', dueDate:'2026-07-31', completed:false },
-  { id:'a005', assignee:'주연', cls:'jooyeon', name:'1차컨펌(카피)', section:'10/7 식기', dueDate:'2026-08-05', completed:false },
-  { id:'a006', assignee:'주연', cls:'jooyeon', name:'최종 카피 컨펌', section:'9/30 겨울뉴본+베이비', dueDate:'2026-08-07', completed:false },
-  { id:'a007', assignee:'주연', cls:'jooyeon', name:'기획 확인', section:'9/16 겨울의류', dueDate:'2026-08-11', completed:false },
-  { id:'a008', assignee:'주연', cls:'jooyeon', name:'최종 카피 컨펌', section:'11/4 홀리데이', dueDate:'2026-08-25', completed:false },
-  { id:'a009', assignee:'주연', cls:'jooyeon', name:'기획 확인', section:'9/30 겨울뉴본+베이비', dueDate:'2026-08-27', completed:false },
-  { id:'a010', assignee:'주연', cls:'jooyeon', name:'최종 카피 컨펌', section:'10/7 식기', dueDate:'2026-08-28', completed:false },
-  { id:'a011', assignee:'주연', cls:'jooyeon', name:'기획 확인', section:'9/16 겨울의류', dueDate:'2026-09-02', completed:false },
-  { id:'a012', assignee:'주연', cls:'jooyeon', name:'기획 확인', section:'9/30 겨울뉴본+베이비', dueDate:'2026-09-11', completed:false },
+  // ── 주연 (9) ──
+  { id:'a001', assignee:'주연', cls:'jooyeon', name:'PDP 최종 7️⃣', section:'9/16 겨울의류', dueDate:'2026-07-31', completed:false },
+  { id:'a002', assignee:'주연', cls:'jooyeon', name:'1차컨펌(카피)', section:'10/7 식기', dueDate:'2026-08-05', completed:false },
+  { id:'a003', assignee:'주연', cls:'jooyeon', name:'최종 카피 컨펌', section:'9/30 겨울뉴본+베이비', dueDate:'2026-08-07', completed:false },
+  { id:'a004', assignee:'주연', cls:'jooyeon', name:'기획 확인', section:'9/16 겨울의류', dueDate:'2026-08-11', completed:false },
+  { id:'a005', assignee:'주연', cls:'jooyeon', name:'최종 카피 컨펌', section:'11/4 홀리데이', dueDate:'2026-08-25', completed:false },
+  { id:'a006', assignee:'주연', cls:'jooyeon', name:'기획 확인', section:'9/30 겨울뉴본+베이비', dueDate:'2026-08-27', completed:false },
+  { id:'a007', assignee:'주연', cls:'jooyeon', name:'최종 카피 컨펌', section:'10/7 식기', dueDate:'2026-08-28', completed:false },
+  { id:'a008', assignee:'주연', cls:'jooyeon', name:'기획 확인', section:'9/16 겨울의류', dueDate:'2026-09-02', completed:false },
+  { id:'a009', assignee:'주연', cls:'jooyeon', name:'기획 확인', section:'9/30 겨울뉴본+베이비', dueDate:'2026-09-11', completed:false },
 
   // ── 진아 (5) ──
   { id:'a101', assignee:'진아', cls:'jina', name:'PDP 원본 삽입 구성 1️⃣1️⃣', section:'9/30 겨울뉴본+베이비', dueDate:'2026-07-29', completed:false },
@@ -310,7 +307,7 @@ const ASANA_TASKS = [
 
   // ── 유진 (10) ──
   { id:'a201', assignee:'유진', cls:'zoey', name:'PDP 원본 삽입 구성 1️⃣1️⃣', section:'9/30 겨울뉴본+베이비', dueDate:'2026-07-29', completed:false },
-  { id:'a202', assignee:'유진', cls:'zoey', name:'피드백 반영', section:'11/4 홀리데이', dueDate:'2026-07-30', completed:false },
+  { id:'a202', assignee:'유진', cls:'zoey', name:'피드백 반영', section:'11/4 홀리데이', dueDate:'2026-08-04', completed:false },
   { id:'a203', assignee:'유진', cls:'zoey', name:'PDP 최종 1️⃣1️⃣', section:'9/30 겨울뉴본+베이비', dueDate:'2026-08-12', completed:false },
   { id:'a204', assignee:'유진', cls:'zoey', name:'콘텐츠 셀렉 (제품+모델컷) 6️⃣', section:'11/4 홀리데이', dueDate:'2026-08-14', completed:false },
   { id:'a205', assignee:'유진', cls:'zoey', name:'PDP 원본 삽입 구성 6️⃣', section:'11/4 홀리데이', dueDate:'2026-08-21', completed:false },
@@ -320,25 +317,24 @@ const ASANA_TASKS = [
   { id:'a209', assignee:'유진', cls:'zoey', name:'피드백 반영', section:'9/30 겨울뉴본+베이비', dueDate:'2026-09-16', completed:false },
   { id:'a210', assignee:'유진', cls:'zoey', name:'기획클로징', section:'9/30 겨울뉴본+베이비', dueDate:'2026-09-17', completed:false },
 
-  // ── 은지 (11) ──
-  { id:'a301', assignee:'은지', cls:'eunji', name:'피드백 반영', section:'9/2 가을뉴본', dueDate:'2026-07-29', completed:false },
-  { id:'a302', assignee:'은지', cls:'eunji', name:'뉴본 가을 컬렉션 기획 클로징', section:'9/2 가을뉴본', dueDate:'2026-07-30', completed:false },
-  { id:'a303', assignee:'은지', cls:'eunji', name:'PDP 최종 🔟+7️⃣', section:'9/16 겨울의류', dueDate:'2026-08-04', completed:false },
-  { id:'a304', assignee:'은지', cls:'eunji', name:'베이비&키즈 겨울 컬렉션페이지 기획', section:'9/16 겨울의류', dueDate:'2026-08-07', completed:false },
-  { id:'a305', assignee:'은지', cls:'eunji', name:'피드백 반영', section:'9/16 겨울의류', dueDate:'2026-08-12', completed:false },
-  { id:'a306', assignee:'은지', cls:'eunji', name:'피드백 반영', section:'9/16 겨울의류', dueDate:'2026-08-19', completed:false },
-  { id:'a307', assignee:'은지', cls:'eunji', name:'기획클로징', section:'9/16 겨울의류', dueDate:'2026-08-20', completed:false },
-  { id:'a308', assignee:'은지', cls:'eunji', name:'베이비&키즈 겨울 컬렉션 2차 업데이트', section:'9/16 겨울의류', dueDate:'2026-08-31', completed:false },
-  { id:'a309', assignee:'은지', cls:'eunji', name:'피드백 반영', section:'9/16 겨울의류', dueDate:'2026-09-03', completed:false },
-  { id:'a310', assignee:'은지', cls:'eunji', name:'마케팅 확인', section:'9/16 겨울의류', dueDate:'2026-09-07', completed:false },
-  { id:'a311', assignee:'은지', cls:'eunji', name:'기획 클로징', section:'9/16 겨울의류', dueDate:'2026-09-10', completed:false },
+  // ── 은지 (10) ──
+  { id:'a301', assignee:'은지', cls:'eunji', name:'뉴본 가을 컬렉션 기획 클로징', section:'9/2 가을뉴본', dueDate:'2026-07-30', completed:false },
+  { id:'a302', assignee:'은지', cls:'eunji', name:'PDP 최종 🔟+7️⃣', section:'9/16 겨울의류', dueDate:'2026-08-04', completed:false },
+  { id:'a303', assignee:'은지', cls:'eunji', name:'베이비&키즈 겨울 컬렉션페이지 기획', section:'9/16 겨울의류', dueDate:'2026-08-07', completed:false },
+  { id:'a304', assignee:'은지', cls:'eunji', name:'피드백 반영', section:'9/16 겨울의류', dueDate:'2026-08-12', completed:false },
+  { id:'a305', assignee:'은지', cls:'eunji', name:'피드백 반영', section:'9/16 겨울의류', dueDate:'2026-08-19', completed:false },
+  { id:'a306', assignee:'은지', cls:'eunji', name:'기획클로징', section:'9/16 겨울의류', dueDate:'2026-08-20', completed:false },
+  { id:'a307', assignee:'은지', cls:'eunji', name:'베이비&키즈 겨울 컬렉션 2차 업데이트', section:'9/16 겨울의류', dueDate:'2026-08-31', completed:false },
+  { id:'a308', assignee:'은지', cls:'eunji', name:'피드백 반영', section:'9/16 겨울의류', dueDate:'2026-09-03', completed:false },
+  { id:'a309', assignee:'은지', cls:'eunji', name:'마케팅 확인', section:'9/16 겨울의류', dueDate:'2026-09-07', completed:false },
+  { id:'a310', assignee:'은지', cls:'eunji', name:'기획 클로징', section:'9/16 겨울의류', dueDate:'2026-09-10', completed:false },
 
   // ── 경진(Kay) (16) ──
-  { id:'a401', assignee:'경진(Kay)', cls:'kay', name:'피드백 반영', section:'11/4 홀리데이', dueDate:'2026-07-30', completed:false },
-  { id:'a402', assignee:'경진(Kay)', cls:'kay', name:'☾필수컷 리전 취합', section:'10/7 식기', dueDate:'2026-07-31', completed:false },
-  { id:'a403', assignee:'경진(Kay)', cls:'kay', name:'(경진) PDP 템플릿 변경 3️⃣ (기존 제품)', section:'10/7 식기', dueDate:'2026-07-31', completed:false },
-  { id:'a404', assignee:'경진(Kay)', cls:'kay', name:'(경진) PDP작성 2️⃣ (신규 론칭)', section:'10/7 식기', dueDate:'2026-07-31', completed:false },
-  { id:'a405', assignee:'경진(Kay)', cls:'kay', name:'필수컷 최종', section:'10/7 식기', dueDate:'2026-08-03', completed:false },
+  { id:'a401', assignee:'경진(Kay)', cls:'kay', name:'☾필수컷 리전 취합', section:'10/7 식기', dueDate:'2026-07-31', completed:false },
+  { id:'a402', assignee:'경진(Kay)', cls:'kay', name:'(경진) PDP 템플릿 변경 3️⃣ (기존 제품)', section:'10/7 식기', dueDate:'2026-07-31', completed:false },
+  { id:'a403', assignee:'경진(Kay)', cls:'kay', name:'(경진) PDP작성 2️⃣ (신규 론칭)', section:'10/7 식기', dueDate:'2026-07-31', completed:false },
+  { id:'a404', assignee:'경진(Kay)', cls:'kay', name:'필수컷 최종', section:'10/7 식기', dueDate:'2026-08-03', completed:false },
+  { id:'a405', assignee:'경진(Kay)', cls:'kay', name:'피드백 반영', section:'11/4 홀리데이', dueDate:'2026-08-04', completed:false },
   { id:'a406', assignee:'경진(Kay)', cls:'kay', name:'(경진) 피드백 반영', section:'10/7 식기', dueDate:'2026-08-07', completed:false },
   { id:'a407', assignee:'경진(Kay)', cls:'kay', name:'콘텐츠 셀렉 (제품+모델컷) 4️⃣', section:'11/4 홀리데이', dueDate:'2026-08-14', completed:false },
   { id:'a408', assignee:'경진(Kay)', cls:'kay', name:'(경진) 피드백 반영', section:'10/7 식기', dueDate:'2026-08-14', completed:false },
