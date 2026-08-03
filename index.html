@@ -108,11 +108,16 @@
   .status-badge.done { background: #F3F4F6; color: #6B7280; }
   .source-badge { font-size: 11px; color: var(--muted); background: #F3F4F6; padding: 2px 7px; border-radius: 8px; }
   .source-badge.manual { background: #EDE9FE; color: #5B21B6; }
+  .source-badge.shared { background: #DCFCE7; color: #166534; }
   .task-name { font-size: 13px; max-width: 280px; }
+  .task-name.done-row { text-decoration: line-through; color: var(--muted); }
   .section-tag { font-size: 11px; color: var(--muted); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .due-date { font-size: 12px; white-space: nowrap; }
   .action-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 13px; padding: 2px 6px; border-radius: 4px; }
   .action-btn:hover { background: #F3F4F6; color: var(--text); }
+  .done-btn { background: none; border: 1px solid var(--border); cursor: pointer; font-size: 11px; padding: 2px 8px; border-radius: 10px; color: var(--muted); white-space: nowrap; }
+  .done-btn:hover { background: #F0FDF4; border-color: #86EFAC; color: #166534; }
+  .done-btn.is-done { background: #F0FDF4; border-color: #86EFAC; color: #166534; }
   .no-results { text-align: center; padding: 40px; color: var(--muted); font-size: 13px; }
 
   /* Manual task form */
@@ -221,7 +226,7 @@
 
   <!-- Manual task form -->
   <div class="manual-form-wrap" id="manual-form">
-    <h3>➕ 아사나 외 업무 직접 입력</h3>
+    <h3>➕ 개인 업무 직접 입력 <span style="font-size:12px;font-weight:400;color:var(--muted)">(이 브라우저에만 저장 · 팀 전체 공유는 클로드에게 요청)</span></h3>
     <div class="form-grid">
       <div class="form-group">
         <label>담당자 *</label>
@@ -257,7 +262,7 @@
 </div>
 
 <div class="footer">
-  콘텐츠 파트 업무 대시보드 ★26FW &nbsp;|&nbsp; 아사나 데이터 마지막 동기화: 2026-08-03 &nbsp;|&nbsp; 수동 입력 데이터는 이 브라우저에 저장됩니다
+  콘텐츠 파트 업무 대시보드 ★26FW &nbsp;|&nbsp; 아사나 데이터 마지막 동기화: 2026-08-03 &nbsp;|&nbsp; 공유 입력: 클로드 요청 → GitHub 동기화 &nbsp;·&nbsp; 개인 입력: 이 브라우저에만 저장
 </div>
 
 <script>
@@ -347,13 +352,30 @@ const ASANA_TASKS = [
   { id:'a416', assignee:'경진(Kay)', cls:'kay', name:'(경진) PDP 최종 2️⃣ (신규 론칭)', section:'10/7 식기', dueDate:'2026-09-01', completed:false },
 ];
 
-// ─── 수동 업무 로드/저장 ────────────────────────────
-const STORAGE_KEY = '26fw_manual_tasks';
+// ─── 공유 수동 업무 (GitHub에 저장 → 모든 팀원에게 보임) ──────────────
+// 추가/수정/삭제는 클로드에게 요청하세요.
+const MANUAL_TASKS_SHARED = [
+];
+
+// ─── 개인 수동 업무 로드/저장 (이 브라우저에만 저장) ────────────────
+const STORAGE_KEY = '26fw_personal_tasks';
 let manualTasks = [];
 try { manualTasks = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e) {}
 
 function saveManual() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(manualTasks));
+}
+
+// ─── 완료 상태 로컬 추적 (수동 업무 완료 처리) ───────────────────────
+const DONE_KEY = '26fw_done_ids';
+let doneIds = new Set();
+try { doneIds = new Set(JSON.parse(localStorage.getItem(DONE_KEY) || '[]')); } catch(e) {}
+
+function toggleDone(id) {
+  if (doneIds.has(id)) doneIds.delete(id);
+  else doneIds.add(id);
+  localStorage.setItem(DONE_KEY, JSON.stringify([...doneIds]));
+  renderAll();
 }
 
 // ─── 필터 상태 ──────────────────────────────────────
@@ -392,18 +414,23 @@ function sortBy(key) {
 
 // ─── 렌더링 ────────────────────────────────────────
 function allTasks() {
-  const manual = manualTasks.map(t => ({ ...t, source: 'manual' }));
-  return [...ASANA_TASKS.map(t => ({ ...t, source: 'asana' })), ...manual];
+  const shared = MANUAL_TASKS_SHARED.map(t => ({ ...t, source: 'shared' }));
+  const personal = manualTasks.map(t => ({ ...t, source: 'manual' }));
+  return [...ASANA_TASKS.map(t => ({ ...t, source: 'asana' })), ...shared, ...personal];
+}
+
+function isTaskDone(t) {
+  return doneIds.has(t.id) || t.completed;
 }
 
 function renderStats() {
   const tasks = allTasks();
   document.getElementById('stat-total').textContent = tasks.length;
-  document.getElementById('stat-overdue').textContent = tasks.filter(t => getStatus(t.dueDate, t.completed) === 'overdue').length;
-  document.getElementById('stat-soon').textContent = tasks.filter(t => ['today','soon'].includes(getStatus(t.dueDate, t.completed))).length;
-  document.getElementById('stat-upcoming').textContent = tasks.filter(t => getStatus(t.dueDate, t.completed) === 'upcoming').length;
+  document.getElementById('stat-overdue').textContent = tasks.filter(t => getStatus(t.dueDate, isTaskDone(t)) === 'overdue').length;
+  document.getElementById('stat-soon').textContent = tasks.filter(t => ['today','soon'].includes(getStatus(t.dueDate, isTaskDone(t)))).length;
+  document.getElementById('stat-upcoming').textContent = tasks.filter(t => getStatus(t.dueDate, isTaskDone(t)) === 'upcoming').length;
   document.getElementById('stat-asana').textContent = tasks.filter(t => t.source === 'asana').length;
-  document.getElementById('stat-manual').textContent = tasks.filter(t => t.source === 'manual').length;
+  document.getElementById('stat-manual').textContent = tasks.filter(t => t.source === 'shared' || t.source === 'manual').length;
 }
 
 function renderWorkload() {
@@ -419,7 +446,7 @@ function renderWorkload() {
   const grid = document.getElementById('workload-grid');
   grid.innerHTML = members.map(m => {
     const mt = tasks.filter(t => t.assignee === m.name);
-    const overdue = mt.filter(t => getStatus(t.dueDate, t.completed) === 'overdue').length;
+    const overdue = mt.filter(t => getStatus(t.dueDate, isTaskDone(t)) === 'overdue').length;
     const pct = Math.round((mt.length / maxCount) * 100);
     return `<div class="workload-card ${m.cls}">
       <div class="person-name">${m.name}</div>
@@ -438,13 +465,13 @@ function renderTable() {
     const nameMap = { jooyeon:'주연', jina:'진아', zoey:'유진', eunji:'은지', kay:'경진(Kay)' };
     tasks = tasks.filter(t => t.assignee === nameMap[filterPerson]);
   }
-  if (filterOverdue) tasks = tasks.filter(t => getStatus(t.dueDate, t.completed) === 'overdue');
+  if (filterOverdue) tasks = tasks.filter(t => getStatus(t.dueDate, isTaskDone(t)) === 'overdue');
   if (filterAsanaOnly) tasks = tasks.filter(t => t.source === 'asana');
   if (search) tasks = tasks.filter(t => t.name.toLowerCase().includes(search) || (t.section||'').toLowerCase().includes(search));
 
   tasks.sort((a, b) => {
     let va = a[sortKey] || '', vb = b[sortKey] || '';
-    if (sortKey === 'status') { va = getStatus(a.dueDate, a.completed); vb = getStatus(b.dueDate, b.completed); }
+    if (sortKey === 'status') { va = getStatus(a.dueDate, isTaskDone(a)); vb = getStatus(b.dueDate, isTaskDone(b)); }
     const r = va < vb ? -1 : va > vb ? 1 : 0;
     return sortAsc ? r : -r;
   });
@@ -460,19 +487,24 @@ function renderTable() {
   noRes.style.display = 'none';
 
   tbody.innerHTML = tasks.map(t => {
-    const st = getStatus(t.dueDate, t.completed);
+    const done = isTaskDone(t);
+    const st = getStatus(t.dueDate, done);
     const diff = dateDiff(t.dueDate);
     const diffStr = diff === null ? '' : diff < 0 ? `(${Math.abs(diff)}일 초과)` : diff === 0 ? '(오늘)' : `(D-${diff})`;
     const isManual = t.source === 'manual';
+    const isShared = t.source === 'shared';
+    const sourceCls = isShared ? 'shared' : isManual ? 'manual' : '';
+    const sourceLabel = isShared ? '공유 입력' : isManual ? '개인 입력' : 'Asana';
     const deleteBtn = isManual ? `<button class="action-btn" onclick="deleteManual('${t.id}')" title="삭제">✕</button>` : '';
-    return `<tr>
+    const doneBtn = (isManual || isShared) ? `<button class="done-btn${done ? ' is-done' : ''}" onclick="toggleDone('${t.id}')">${done ? '↩ 되돌리기' : '✓ 완료'}</button>` : '';
+    return `<tr${done ? ' style="opacity:0.55"' : ''}>
       <td><span class="assignee-badge ${t.cls}">${t.assignee}</span></td>
-      <td class="task-name">${t.name}${t.note ? `<div style="font-size:11px;color:var(--muted);margin-top:2px;">${t.note}</div>` : ''}</td>
+      <td class="task-name${done ? ' done-row' : ''}">${t.name}${t.note ? `<div style="font-size:11px;color:var(--muted);margin-top:2px;">${t.note}</div>` : ''}</td>
       <td class="section-tag">${t.section || '—'}</td>
       <td class="due-date">${fmtDate(t.dueDate)} <span style="font-size:11px;color:var(--muted)">${diffStr}</span></td>
       <td><span class="status-badge ${st}">${statusLabel(st)}</span></td>
-      <td><span class="source-badge ${isManual ? 'manual' : ''}">${isManual ? '수동 입력' : 'Asana'}</span></td>
-      <td>${deleteBtn}</td>
+      <td><span class="source-badge ${sourceCls}">${sourceLabel}</span></td>
+      <td style="display:flex;gap:4px;align-items:center;">${doneBtn}${deleteBtn}</td>
     </tr>`;
   }).join('');
 }
