@@ -226,7 +226,7 @@
 
   <!-- Manual task form -->
   <div class="manual-form-wrap" id="manual-form">
-    <h3>➕ 개인 업무 직접 입력 <span style="font-size:12px;font-weight:400;color:var(--muted)">(이 브라우저에만 저장 · 팀 전체 공유는 클로드에게 요청)</span></h3>
+    <h3>➕ 업무 직접 입력 <span style="font-size:12px;font-weight:400;color:var(--muted)">(팀 전체 공유 · 실시간 반영)</span></h3>
     <div class="form-grid">
       <div class="form-group">
         <label>담당자 *</label>
@@ -262,9 +262,11 @@
 </div>
 
 <div class="footer">
-  콘텐츠 파트 업무 대시보드 ★26FW &nbsp;|&nbsp; 아사나 데이터 마지막 동기화: 2026-08-04 &nbsp;|&nbsp; 공유 입력: 클로드 요청 → GitHub 동기화 &nbsp;·&nbsp; 개인 입력: 이 브라우저에만 저장
+  콘텐츠 파트 업무 대시보드 ★26FW &nbsp;|&nbsp; 아사나 데이터 마지막 동기화: 2026-08-04 &nbsp;|&nbsp; 공유 업무: Firebase 실시간 동기화 &nbsp;·&nbsp; 아사나: 매일 9시 자동 업데이트
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <script>
 // ─── 날짜 유틸 ─────────────────────────────────────
 const TODAY = new Date('2026-08-04');
@@ -348,30 +350,30 @@ const ASANA_TASKS = [
   { id:'a413', assignee:'경진(Kay)', cls:'kay', name:'(경진) PDP 최종 2️⃣ (신규 론칭)', section:'10/7 식기', dueDate:'2026-09-01', completed:false },
 ];
 
-// ─── 공유 수동 업무 (GitHub에 저장 → 모든 팀원에게 보임) ──────────────
-// 추가/수정/삭제는 클로드에게 요청하세요.
-const MANUAL_TASKS_SHARED = [
-];
+// ─── Firebase 공유 수동 업무 (실시간 동기화) ──────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyB8nQThBxhNMCoi_v7jDwdU7rHBdq6cz4g",
+  authDomain: "konny-content-dashboard.firebaseapp.com",
+  databaseURL: "https://konny-content-dashboard-default-rtdb.firebaseio.com",
+  projectId: "konny-content-dashboard",
+  storageBucket: "konny-content-dashboard.firebasestorage.app",
+  messagingSenderId: "1045262444884",
+  appId: "1:1045262444884:web:c45d87a69a7af0403280c1"
+};
+firebase.initializeApp(firebaseConfig);
 
-// ─── 개인 수동 업무 로드/저장 (이 브라우저에만 저장) ────────────────
-const STORAGE_KEY = '26fw_personal_tasks';
-let manualTasks = [];
-try { manualTasks = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e) {}
-
-function saveManual() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(manualTasks));
-}
-
-// ─── 완료 상태 로컬 추적 (수동 업무 완료 처리) ───────────────────────
-const DONE_KEY = '26fw_done_ids';
-let doneIds = new Set();
-try { doneIds = new Set(JSON.parse(localStorage.getItem(DONE_KEY) || '[]')); } catch(e) {}
+let sharedTasks = [];
+firebase.database().ref('sharedTasks').on('value', (snapshot) => {
+  const data = snapshot.val();
+  sharedTasks = data ? Object.entries(data).map(([id, t]) => ({ ...t, id, source: 'shared' })) : [];
+  renderAll();
+});
 
 function toggleDone(id) {
-  if (doneIds.has(id)) doneIds.delete(id);
-  else doneIds.add(id);
-  localStorage.setItem(DONE_KEY, JSON.stringify([...doneIds]));
-  renderAll();
+  const task = sharedTasks.find(t => t.id === id);
+  if (task) {
+    firebase.database().ref('sharedTasks/' + id + '/completed').set(!task.completed);
+  }
 }
 
 // ─── 필터 상태 ──────────────────────────────────────
@@ -410,13 +412,11 @@ function sortBy(key) {
 
 // ─── 렌더링 ────────────────────────────────────────
 function allTasks() {
-  const shared = MANUAL_TASKS_SHARED.map(t => ({ ...t, source: 'shared' }));
-  const personal = manualTasks.map(t => ({ ...t, source: 'manual' }));
-  return [...ASANA_TASKS.map(t => ({ ...t, source: 'asana' })), ...shared, ...personal];
+  return [...ASANA_TASKS.map(t => ({ ...t, source: 'asana' })), ...sharedTasks];
 }
 
 function isTaskDone(t) {
-  return doneIds.has(t.id) || t.completed;
+  return t.completed === true;
 }
 
 function renderStats() {
@@ -426,7 +426,7 @@ function renderStats() {
   document.getElementById('stat-soon').textContent = tasks.filter(t => ['today','soon'].includes(getStatus(t.dueDate, isTaskDone(t)))).length;
   document.getElementById('stat-upcoming').textContent = tasks.filter(t => getStatus(t.dueDate, isTaskDone(t)) === 'upcoming').length;
   document.getElementById('stat-asana').textContent = tasks.filter(t => t.source === 'asana').length;
-  document.getElementById('stat-manual').textContent = tasks.filter(t => t.source === 'shared' || t.source === 'manual').length;
+  document.getElementById('stat-manual').textContent = tasks.filter(t => t.source === 'shared').length;
 }
 
 function renderWorkload() {
@@ -487,12 +487,11 @@ function renderTable() {
     const st = getStatus(t.dueDate, done);
     const diff = dateDiff(t.dueDate);
     const diffStr = diff === null ? '' : diff < 0 ? `(${Math.abs(diff)}일 초과)` : diff === 0 ? '(오늘)' : `(D-${diff})`;
-    const isManual = t.source === 'manual';
     const isShared = t.source === 'shared';
-    const sourceCls = isShared ? 'shared' : isManual ? 'manual' : '';
-    const sourceLabel = isShared ? '공유 입력' : isManual ? '개인 입력' : 'Asana';
-    const deleteBtn = isManual ? `<button class="action-btn" onclick="deleteManual('${t.id}')" title="삭제">✕</button>` : '';
-    const doneBtn = (isManual || isShared) ? `<button class="done-btn${done ? ' is-done' : ''}" onclick="toggleDone('${t.id}')">${done ? '↩ 되돌리기' : '✓ 완료'}</button>` : '';
+    const sourceCls = isShared ? 'shared' : '';
+    const sourceLabel = isShared ? '공유 입력' : 'Asana';
+    const deleteBtn = isShared ? `<button class="action-btn" onclick="deleteManual('${t.id}')" title="삭제">✕</button>` : '';
+    const doneBtn = isShared ? `<button class="done-btn${done ? ' is-done' : ''}" onclick="toggleDone('${t.id}')">${done ? '↩ 되돌리기' : '✓ 완료'}</button>` : '';
     return `<tr${done ? ' style="opacity:0.55"' : ''}>
       <td><span class="assignee-badge ${t.cls}">${t.assignee}</span></td>
       <td class="task-name${done ? ' done-row' : ''}">${t.name}${t.note ? `<div style="font-size:11px;color:var(--muted);margin-top:2px;">${t.note}</div>` : ''}</td>
@@ -513,26 +512,21 @@ function addManualTask() {
 
   const [cls, assignee] = assigneeRaw.split('|');
   const task = {
-    id: 'm' + Date.now(),
     assignee, cls,
     name,
-    section: document.getElementById('f-section').value.trim(),
+    section: document.getElementById('f-section').value.trim() || null,
     dueDate: document.getElementById('f-due').value || null,
-    note: document.getElementById('f-note').value.trim(),
+    note: document.getElementById('f-note').value.trim() || null,
     completed: false,
-    source: 'manual',
+    createdAt: Date.now(),
   };
-  manualTasks.push(task);
-  saveManual();
+  firebase.database().ref('sharedTasks').push(task);
   ['f-assignee','f-name','f-section','f-due','f-note'].forEach(id => { document.getElementById(id).value = ''; });
-  renderAll();
 }
 
 function deleteManual(id) {
   if (!confirm('이 업무를 삭제할까요?')) return;
-  manualTasks = manualTasks.filter(t => t.id !== id);
-  saveManual();
-  renderAll();
+  firebase.database().ref('sharedTasks/' + id).remove();
 }
 
 function renderAll() {
