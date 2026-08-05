@@ -262,14 +262,14 @@
 </div>
 
 <div class="footer">
-  콘텐츠 파트 업무 대시보드 ★26FW &nbsp;|&nbsp; 아사나 데이터 마지막 동기화: 2026-08-04 &nbsp;|&nbsp; 공유 업무: Firebase 실시간 동기화 &nbsp;·&nbsp; 아사나: 매일 9시 자동 업데이트
+  콘텐츠 파트 업무 대시보드 ★26FW &nbsp;|&nbsp; 아사나 데이터 마지막 동기화: 2026-08-05 &nbsp;|&nbsp; 공유 업무: Firebase 실시간 동기화 &nbsp;·&nbsp; 아사나: 매일 9시 자동 업데이트
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <script>
 // ─── 날짜 유틸 ─────────────────────────────────────
-const TODAY = new Date('2026-08-04');
+const TODAY = new Date('2026-08-05');
 function dateDiff(d) {
   if (!d) return null;
   return Math.ceil((new Date(d) - TODAY) / 86400000);
@@ -292,18 +292,17 @@ function fmtDate(d) {
   return `${m}/${day}`;
 }
 
-// ─── 아사나 업무 데이터 (2026-08-04 동기화) ──────────────────────────────
+// ─── 아사나 업무 데이터 (2026-08-05 동기화) ──────────────────────────────
 const ASANA_TASKS = [
-  // ── 주연 (9) ──
-  { id:'a001', assignee:'주연', cls:'jooyeon', name:'PDP 최종 7️⃣', section:'9/16 겨울의류', dueDate:'2026-07-31', completed:false },
-  { id:'a002', assignee:'주연', cls:'jooyeon', name:'1차컨펌(카피)', section:'10/7 식기', dueDate:'2026-08-05', completed:false },
-  { id:'a003', assignee:'주연', cls:'jooyeon', name:'최종 카피 컨펌', section:'9/30 겨울뉴본+베이비', dueDate:'2026-08-07', completed:false },
-  { id:'a004', assignee:'주연', cls:'jooyeon', name:'기획 확인', section:'9/16 겨울의류', dueDate:'2026-08-11', completed:false },
-  { id:'a005', assignee:'주연', cls:'jooyeon', name:'최종 카피 컨펌', section:'11/4 홀리데이', dueDate:'2026-08-25', completed:false },
-  { id:'a006', assignee:'주연', cls:'jooyeon', name:'기획 확인', section:'9/30 겨울뉴본+베이비', dueDate:'2026-08-27', completed:false },
-  { id:'a007', assignee:'주연', cls:'jooyeon', name:'최종 카피 컨펌', section:'10/7 식기', dueDate:'2026-08-28', completed:false },
-  { id:'a008', assignee:'주연', cls:'jooyeon', name:'기획 확인', section:'9/16 겨울의류', dueDate:'2026-09-02', completed:false },
-  { id:'a009', assignee:'주연', cls:'jooyeon', name:'기획 확인', section:'9/30 겨울뉴본+베이비', dueDate:'2026-09-11', completed:false },
+  // ── 주연 (8) ──
+  { id:'a001', assignee:'주연', cls:'jooyeon', name:'1차컨펌(카피)', section:'10/7 식기', dueDate:'2026-08-05', completed:false },
+  { id:'a002', assignee:'주연', cls:'jooyeon', name:'최종 카피 컨펌', section:'9/30 겨울뉴본+베이비', dueDate:'2026-08-07', completed:false },
+  { id:'a003', assignee:'주연', cls:'jooyeon', name:'기획 확인', section:'9/16 겨울의류', dueDate:'2026-08-11', completed:false },
+  { id:'a004', assignee:'주연', cls:'jooyeon', name:'최종 카피 컨펌', section:'11/4 홀리데이', dueDate:'2026-08-25', completed:false },
+  { id:'a005', assignee:'주연', cls:'jooyeon', name:'기획 확인', section:'9/30 겨울뉴본+베이비', dueDate:'2026-08-27', completed:false },
+  { id:'a006', assignee:'주연', cls:'jooyeon', name:'최종 카피 컨펌', section:'10/7 식기', dueDate:'2026-08-28', completed:false },
+  { id:'a007', assignee:'주연', cls:'jooyeon', name:'기획 확인', section:'9/16 겨울의류', dueDate:'2026-09-02', completed:false },
+  { id:'a008', assignee:'주연', cls:'jooyeon', name:'기획 확인', section:'9/30 겨울뉴본+베이비', dueDate:'2026-09-11', completed:false },
 
   // ── 진아 (4) ──
   { id:'a101', assignee:'진아', cls:'jina', name:'PDP 최종 1️⃣1️⃣', section:'9/30 겨울뉴본+베이비', dueDate:'2026-08-12', completed:false },
@@ -334,20 +333,19 @@ const ASANA_TASKS = [
   { id:'a308', assignee:'은지', cls:'eunji', name:'마케팅 확인', section:'9/16 겨울의류', dueDate:'2026-09-07', completed:false },
   { id:'a309', assignee:'은지', cls:'eunji', name:'기획 클로징', section:'9/16 겨울의류', dueDate:'2026-09-10', completed:false },
 
-  // ── 경진(Kay) (13) ──
-  { id:'a401', assignee:'경진(Kay)', cls:'kay', name:'필수컷 최종', section:'10/7 식기', dueDate:'2026-08-03', completed:false },
-  { id:'a402', assignee:'경진(Kay)', cls:'kay', name:'피드백 반영', section:'11/4 홀리데이', dueDate:'2026-08-04', completed:false },
-  { id:'a403', assignee:'경진(Kay)', cls:'kay', name:'(경진) 피드백 반영', section:'10/7 식기', dueDate:'2026-08-07', completed:false },
-  { id:'a404', assignee:'경진(Kay)', cls:'kay', name:'콘텐츠 셀렉 (제품+모델컷) 4️⃣', section:'11/4 홀리데이', dueDate:'2026-08-14', completed:false },
-  { id:'a405', assignee:'경진(Kay)', cls:'kay', name:'(경진) 피드백 반영', section:'10/7 식기', dueDate:'2026-08-14', completed:false },
-  { id:'a406', assignee:'경진(Kay)', cls:'kay', name:'(경진) 콘텐츠 셀렉 (제품컷)', section:'10/7 식기', dueDate:'2026-08-19', completed:false },
-  { id:'a407', assignee:'경진(Kay)', cls:'kay', name:'PDP 원본 삽입 구성 4️⃣', section:'11/4 홀리데이', dueDate:'2026-08-21', completed:false },
-  { id:'a408', assignee:'경진(Kay)', cls:'kay', name:'(경진) 콘텐츠 셀렉(모델)', section:'10/7 식기', dueDate:'2026-08-21', completed:false },
-  { id:'a409', assignee:'경진(Kay)', cls:'kay', name:'(경진) PDP 원본 삽입 구성 3️⃣ (기존 제품)', section:'10/7 식기', dueDate:'2026-08-26', completed:false },
-  { id:'a410', assignee:'경진(Kay)', cls:'kay', name:'(경진) PDP 원본 삽입 구성 2️⃣ (신규 론칭)', section:'10/7 식기', dueDate:'2026-08-26', completed:false },
-  { id:'a411', assignee:'경진(Kay)', cls:'kay', name:'PDP 최종 4️⃣', section:'11/4 홀리데이', dueDate:'2026-08-27', completed:false },
-  { id:'a412', assignee:'경진(Kay)', cls:'kay', name:'(경진) PDP 최종 3️⃣ (기존 제품)', section:'10/7 식기', dueDate:'2026-09-01', completed:false },
-  { id:'a413', assignee:'경진(Kay)', cls:'kay', name:'(경진) PDP 최종 2️⃣ (신규 론칭)', section:'10/7 식기', dueDate:'2026-09-01', completed:false },
+  // ── 경진(Kay) (12) ──
+  { id:'a401', assignee:'경진(Kay)', cls:'kay', name:'피드백 반영', section:'11/4 홀리데이', dueDate:'2026-08-04', completed:false },
+  { id:'a402', assignee:'경진(Kay)', cls:'kay', name:'(경진) 피드백 반영', section:'10/7 식기', dueDate:'2026-08-07', completed:false },
+  { id:'a403', assignee:'경진(Kay)', cls:'kay', name:'콘텐츠 셀렉 (제품+모델컷) 4️⃣', section:'11/4 홀리데이', dueDate:'2026-08-14', completed:false },
+  { id:'a404', assignee:'경진(Kay)', cls:'kay', name:'(경진) 피드백 반영', section:'10/7 식기', dueDate:'2026-08-14', completed:false },
+  { id:'a405', assignee:'경진(Kay)', cls:'kay', name:'(경진) 콘텐츠 셀렉 (제품컷)', section:'10/7 식기', dueDate:'2026-08-21', completed:false },
+  { id:'a406', assignee:'경진(Kay)', cls:'kay', name:'PDP 원본 삽입 구성 4️⃣', section:'11/4 홀리데이', dueDate:'2026-08-21', completed:false },
+  { id:'a407', assignee:'경진(Kay)', cls:'kay', name:'(경진) 콘텐츠 셀렉(모델)', section:'10/7 식기', dueDate:'2026-08-21', completed:false },
+  { id:'a408', assignee:'경진(Kay)', cls:'kay', name:'(경진) PDP 원본 삽입 구성 3️⃣ (기존 제품)', section:'10/7 식기', dueDate:'2026-08-26', completed:false },
+  { id:'a409', assignee:'경진(Kay)', cls:'kay', name:'(경진) PDP 원본 삽입 구성 2️⃣ (신규 론칭)', section:'10/7 식기', dueDate:'2026-08-26', completed:false },
+  { id:'a410', assignee:'경진(Kay)', cls:'kay', name:'PDP 최종 4️⃣', section:'11/4 홀리데이', dueDate:'2026-08-27', completed:false },
+  { id:'a411', assignee:'경진(Kay)', cls:'kay', name:'(경진) PDP 최종 3️⃣ (기존 제품)', section:'10/7 식기', dueDate:'2026-09-01', completed:false },
+  { id:'a412', assignee:'경진(Kay)', cls:'kay', name:'(경진) PDP 최종 2️⃣ (신규 론칭)', section:'10/7 식기', dueDate:'2026-09-01', completed:false },
 ];
 
 // ─── Firebase 공유 수동 업무 (실시간 동기화) ──────────────────────────
